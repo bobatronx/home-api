@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: echo-app
+  name: echo-app
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: echo-app
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: echo-app
+    spec:
+      containers:
+      - image: us.gcr.io/teak-bebop-123023/echo-app:latest
+        name: echo-app
+        ports:
+        - containerPort: 9000
+          name: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: echo-app
+  namespace: default
+  labels:
+    service: echo-app
+spec:
+  ports:
+  - port: 9000
+    protocol: TCP
+  selector:
+    app: echo-app

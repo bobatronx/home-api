@@ -11,28 +11,11 @@ resource "google_container_cluster" "primary" {
     }
   }
 
-  private_cluster_config {
-    enable_private_nodes    = true
-    enable_private_endpoint = false
-    master_ipv4_cidr_block  = "172.168.0.0/28"
+  release_channel {
+    channel = "REGULAR"
   }
-}
 
-resource "google_compute_router" "router" {
-  name    = "gke-router"
-  region  = data.google_client_config.current.region
-  network = google_container_cluster.primary.network
-}
-
-resource "google_compute_router_nat" "nat" {
-  name                               = "gke-router-nat"
-  router                             = google_compute_router.router.name
-  region                             = google_compute_router.router.region
-  nat_ip_allocate_option             = "AUTO_ONLY"
-  source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES"
-
-  log_config {
-    enable = true
-    filter = "ERRORS_ONLY"
+  vertical_pod_autoscaling {
+    enabled = true
   }
 }
