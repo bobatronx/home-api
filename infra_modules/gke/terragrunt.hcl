@@ -15,8 +15,8 @@ terraform {
     ]
 
     env_vars = {
-      TF_VAR_project_id = "teak-bebop-123023",
-      TF_VAR_project_number = "969632929420"
+      project_id = "teak-bebop-123023",
+      project_number = "969632929420"
     }
   }
 }
