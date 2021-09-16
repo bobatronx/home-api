@@ -2,7 +2,7 @@ package models
 
 type Land struct {
 	ID        int         `json:"id"`
-	Acres     string     `json:"acres"`
+	Acres     string      `json:"acres"`
 	Buildings []*Building `json:"buildings"`
 }
 

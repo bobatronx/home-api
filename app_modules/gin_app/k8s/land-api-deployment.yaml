@@ -2,22 +2,22 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: echo-app
-  name: echo-app
+    app: land-api
+  name: land-api
   namespace: default
 spec:
   selector:
     matchLabels:
-      app: echo-app
+      app: 
   replicas: 1
   template:
     metadata:
       labels:
-        app: echo-app
+        app: land-api
     spec:
       containers:
-      - image: us.gcr.io/teak-bebop-123023/echo-app:latest
-        name: echo-app
+      - image: us.gcr.io/teak-bebop-123023/land-api:latest
+        name: land-api
         ports:
         - containerPort: 9000
           name: http
@@ -25,13 +25,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: echo-app
+  name: land-api
   namespace: default
   labels:
-    service: echo-app
+    service: land-api
 spec:
   ports:
   - port: 9000
     protocol: TCP
   selector:
-    app: echo-app
+    app: land-api
