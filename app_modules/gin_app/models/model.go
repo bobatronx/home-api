@@ -7,5 +7,9 @@ type Land struct {
 }
 
 type Building struct {
-	Name string `json:"name"`
+	Name   string `json:"name"`
+	Width  int    `json:"width"`
+	Length int    `json:"length"`
+	Height int    `json:"height"`
+	Color  string `json:"color"`
 }

@@ -2,59 +2,98 @@ package controllers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/bobatronx/gin-app/v2/models"
-	"github.com/bobatronx/gin-app/v2/services"
+	"github.com/bobatronx/gin-app/v2/service"
 	"github.com/gin-gonic/gin"
 )
-
-type landRequest struct {
-	Acres     string            `json:"acres"`
-	Buildings []buildingRequest `json:"buildings"`
-}
-
-type buildingRequest struct {
-	Name string `json:"name"`
-}
 
 func InitializeControllers(router *gin.Engine) {
 	v1 := router.Group("/v1")
 	{
-		v1.GET("/lands", registerGetLandEndpoint)
-		v1.POST("/lands", registerAddLandEndpoint)
+		v1.GET("/lands", getLandsController)
+		v1.POST("/lands", createLandController)
+		v1.GET("/lands/:id", getLandByIdController)
+		v1.PUT("/lands/:id", updateLandController)
+		v1.DELETE("/lands/:id", deleteLandController)
 	}
 }
 
-func registerGetLandEndpoint(c *gin.Context) {
-	lands := services.GetLands()
+func getLandsController(c *gin.Context) {
+	lands := service.GetLands()
 	c.JSON(http.StatusOK, lands)
 }
 
-func registerAddLandEndpoint(c *gin.Context) {
-	land := new(landRequest)
-	if err := c.ShouldBindJSON(land); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	buildings := []*models.Building{}
-
-	for _, v := range land.Buildings {
-		building := models.Building(v)
-		buildings = append(buildings, &building)
-	}
-
-	new_land := models.Land{
-		Acres:     land.Acres,
-		Buildings: buildings,
-	}
-
-	created_land, err := services.AddLand(&new_land)
+func getLandByIdController(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
 
 	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Land id must be a valid integer"})
+		return
+	}
+
+	land := service.GetLandById(id)
+
+	if land.ID == 0 {
+		c.Status(http.StatusNotFound)
+		return
+	}
+
+	c.JSON(http.StatusOK, land)
+}
+
+func createLandController(c *gin.Context) {
+
+	land := models.Land{}
+
+	if err := c.ShouldBindJSON(&land); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusCreated, created_land)
+	createdLand := service.CreateLand(&land)
+
+	c.JSON(http.StatusCreated, createdLand)
+}
+
+func updateLandController(c *gin.Context) {
+
+	id, err := strconv.Atoi(c.Param("id"))
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Land id must be a valid integer"})
+		return
+	}
+
+	land := models.Land{ID: id}
+
+	if err := c.ShouldBindJSON(&land); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	land.ID = id
+
+	updatedLand := service.UpdateLand(&land)
+
+	c.JSON(http.StatusOK, updatedLand)
+}
+
+func deleteLandController(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Land id must be a valid integer"})
+		return
+	}
+
+	success := service.DeleteLandById(id)
+
+	if !success {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Unable to delete the specified land"})
+		return
+	}
+
+	c.Status(http.StatusOK)
 }
